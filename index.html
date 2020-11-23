@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-orbit-controls@1.2.0/dist/aframe-orbit-controls.min.js"></script>
+    <title>Document</title>
+</head>
+<body>
+    <a-scene>
+        <a-box position="0 0 0" color="#fff" material="roughness: 1; metalness: 0.8; emissive: #111"></a-box>
+        <a-box position="0 0 -2"></a-box>
+        <a-plane position="0 0 0" rotation="90 0 0" width=5 height=5 material="side: double; wireframe: true;"></a-plane>
+        <a-sky color="#000"></a-sky>
+
+        <!-- Orbit camera -->
+        <a-entity camera look-controls="enabled: false"
+            orbit-controls="target: 0 0 0; minDistance: 0.5; maxDistance: 180; initialPosition: 1 1 1">
+        </a-entity>
+    </a-scene>
+</body>
+</html>
