@@ -41,51 +41,114 @@ scene.add(gridHelper);
 
 class Vector {
     constructor(origin, pos) {
+        // Parameters
         this.origin = origin;
         this.pos = pos;
         this.size = 0.15;
-        this.length = 2;
+        this.length = Math.sqrt(
+            this.pos.x ** 2 +
+            this.pos.y ** 2 +
+            this.pos.z ** 2
+        );
 
-        const vHeadGeo = new THREE.CylinderGeometry(0, this.size, 2 * this.size, 32);
-        const vHead = new THREE.Mesh(vHeadGeo);
-        vHead.translateY(this.length - this.size);
-        vHead.updateMatrix();
+        // Internal objects
+        this.vHead;
+        this.vBody;
+        this.vHeadGeo;
+        this.vBodyGeo;
+        this.vector = new THREE.Group();
 
-        const vBodyGeo = new THREE.CylinderGeometry(this.size / 2, this.size / 2, this.length - 2 * this.size, 32);
-        const vBody = new THREE.Mesh(vBodyGeo);
-        vBody.translateY(this.length / 2 - this.size);
-        vBody.updateMatrix();
+        // Materials
+        this.vMat = new THREE.MeshBasicMaterial({ color: 0x00aaff });
 
-        const vGeo = new THREE.Geometry();
-        const vMat = new THREE.MeshBasicMaterial({ color: 0x00aaff });
-        vGeo.merge(vHead.geometry, vHead.matrix);
-        vGeo.merge(vBody.geometry, vBody.matrix);
+        // Head model
+        this.buildHead();
 
-        this.vector = new THREE.Mesh(vGeo, vMat);
+        // Body model
+        this.buildBody();
+
+        // Vector object
+        this.vector.add(this.vHead, this.vBody);
         this.vector.position.add(origin);
     }
 
+    buildHead() {
+        if (this.vHeadGeo)
+            this.vHeadGeo.dispose();
+        this.vHeadGeo = new THREE.CylinderGeometry(0, this.size, 2 * this.size, 32);
+        this.vHead = new THREE.Mesh(this.vHeadGeo, this.vMat);
+        this.vHead.translateY(this.length - this.size);
+        this.vHead.updateMatrix();
+    }
+
+    buildBody() {
+        if (this.vBodyGeo)
+            this.vBodyGeo.dispose();
+        this.vBodyGeo = new THREE.CylinderGeometry(this.size / 2, this.size / 2, this.length - 2 * this.size, 32);
+        this.vBody = new THREE.Mesh(this.vBodyGeo, this.vMat);
+        this.vBody.translateY(this.length / 2 - this.size);
+        this.vBody.updateMatrix();
+    }
+
+    lookAt(pos) {
+        let yrot, zrot;
+        try {
+            yrot = Math.acos(pos.x / Math.sqrt(pos.x ** 2 + pos.z ** 2));
+            if (pos.z < 0)
+                yrot *= -1;
+        } catch {
+            yrot = 0;
+        }
+        try {
+            zrot = Math.acos(pos.y / Math.sqrt(pos.x ** 2 + pos.y ** 2 + pos.z ** 2));
+        } catch {
+            zrot = 0;
+        }
+        this.vector.rotation.set(0, 0, 0);
+        this.vector.rotateY(-yrot);
+        this.vector.rotateZ(-zrot);
+    }
+
     update() {
-        this.vector.geometry.scale(1, 1, 1);
+        this.length = Math.sqrt(
+            this.pos.x ** 2 +
+            this.pos.y ** 2 +
+            this.pos.z ** 2
+        );
+
+        this.buildHead();
+        this.buildBody();
+        this.vector.children = [];
+        this.vector.add(this.vHead, this.vBody);
+        this.lookAt(pos);
     }
 }
 
-const origin = new THREE.Vector3(0, 0, 0);
-const pos = new THREE.Vector3(0, 0, 0);
+const origin = new THREE.Vector3(0, 1, 0);
+const pos = new THREE.Vector3(0, -1, -1);
+let w = new THREE.Vector3(0, 0, 0);
 
 const v = new Vector(origin,pos);
-v.vector.rotation.set(0, 0, 1/16 * Math.PI);
+v.vector.getWorldDirection(w);
+// v.vector.rotation.set(0, 0, 8/16 * Math.PI);
 scene.add(v.vector);
 
+let theta = 0;
 const animate = function () {
     requestAnimationFrame(animate);
 
     // Update orbital camera
     controls.update();
+    theta += 0.01;
+    v.pos.x = Math.sin(theta);
+
+    // v.length = Math.sin(x) + 1;
     v.update();
-    v.vector.rotation.y += 0.1;
+    // v.vector.rotation.y += 0.1;
 
     renderer.render(scene, camera);
 };
 
 animate();
+var axesHelper = new THREE.AxesHelper(8);
+scene.add(axesHelper);
