@@ -3,17 +3,17 @@ import ReactDOM from 'react-dom';
 import { JsxAttribute } from 'typescript';
 
 import * as THREE from 'three';
-import { GridHelper } from 'three';
+import { GridHelper, Mesh } from 'three';
 import {Camera} from './camera';
 
-import { Canvas, extend, ReactThreeFiber, useFrame, useThree } from 'react-three-fiber';
+import { Canvas, extend, MeshProps, useFrame } from 'react-three-fiber';
 
 import './index.css';
 
 extend({ GridHelper });
 
-function Box(props : any) {
-    const mesh = useRef<THREE.Mesh>();
+function Box(props : MeshProps) {
+    const mesh = useRef<Mesh>();
 
     const [hovered, setHover] = useState(false);
     const [active, setActive] = useState(false);
@@ -41,12 +41,12 @@ function Box(props : any) {
 
 ReactDOM.render(
     <Canvas className={"canvas"}>
-        <Camera />
         <gridHelper />
         <ambientLight />
         <pointLight position={[10, 10, 10]}/>
         <Box position={[-1.2, 0, 0]}/>
         <Box position={[1.2, 0, 0]}/>
+        <Camera />
     </Canvas>,
     document.getElementById('root')
 );

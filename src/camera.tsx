@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { extend, ReactThreeFiber, useFrame, useThree } from 'react-three-fiber';
+import { CameraProps, extend, ReactThreeFiber, useFrame, useThree } from 'react-three-fiber';
 
 extend({ OrbitControls });
 
@@ -12,7 +12,7 @@ declare global {
     }
 }
 
-export function Camera(props : any) {
+export function Camera(props : CameraProps) {
     const {
         camera,
         gl: { domElement },
