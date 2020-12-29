@@ -1,52 +1,67 @@
-import React, { DOMElement, MouseEventHandler, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import { JsxAttribute } from 'typescript';
 
-import * as THREE from 'three';
-import { GridHelper, Mesh } from 'three';
-import {Camera} from './camera';
-
-import { Canvas, extend, MeshProps, useFrame } from 'react-three-fiber';
+import { GridHelper } from 'three';
+import { Canvas, extend } from 'react-three-fiber';
 
 import './index.css';
+import { Camera } from './camera';
+import * as SETTINGS from './settings';
+import { useStore } from './store';
+import { VectorsAddGroup } from './ui';
+import { Menu } from '@material-ui/icons';
+import { IconButton } from '@material-ui/core';
 
 extend({ GridHelper });
 
-function Box(props : MeshProps) {
-    const mesh = useRef<Mesh>();
-
-    const [hovered, setHover] = useState(false);
-    const [active, setActive] = useState(false);
-
-    useFrame(() => {
-        if (mesh.current) {
-            mesh.current.rotation.x = mesh.current.rotation.y += 0.01;
-        }
-    });
+function VectorContainer() {
+    const vectors = useStore(state => state.vectors);
 
     return (
-        <mesh
+        <group>
+            {vectors}
+        </group>
+    );
+}
+
+function CustomDrawer(props : any) {
+    const [collapsed, setCollapsed] = useState(false);
+
+    return (
+        <div
             {...props}
-            ref={mesh}
-            scale={active ? [1.5, 1.5, 1.5] : [1, 1, 1]}
-            onClick={(event) => setActive(!active)}
-            onPointerOver={(event) => setHover(true)}
-            onPointerOut={(event) => setHover(false)}
+            className={"drawer " + (collapsed ? "drawer-collapsed" : "")}
         >
-            <boxBufferGeometry args={[1, 1, 1]}/>
-            <meshStandardMaterial color={hovered ? 'hotpink' : 'orange'}/>
-        </mesh>
+            <IconButton className={"drawer-collapse-button"}
+                onClick={() => setCollapsed(!collapsed)}
+            >
+                <Menu />
+            </IconButton>
+            {collapsed ? null : props.children}
+        </div>
     )
 }
 
 ReactDOM.render(
-    <Canvas className={"canvas"}>
-        <gridHelper />
-        <ambientLight />
-        <pointLight position={[10, 10, 10]}/>
-        <Box position={[-1.2, 0, 0]}/>
-        <Box position={[1.2, 0, 0]}/>
-        <Camera />
-    </Canvas>,
+    <div className={"container"}>
+        <CustomDrawer hidden={false}>
+            <button onClick={() => SETTINGS.toggleCameraAutoRotate()}>Toggle Autorotate</button>
+            <VectorsAddGroup />
+        </CustomDrawer>
+        <div className={"graph"}>
+            <Canvas className={"canvas"}>
+                <group rotation={[0, 0, 0]}>
+                    <axesHelper rotation={[-Math.PI / 2, 0, -Math.PI / 2]}/>
+                    <gridHelper />
+                    <VectorContainer />
+                </group>
+                <ambientLight />
+                <pointLight position={[10, 10, 10]}/>
+                {/* <Box position={[-1.2, 0, 0]}/>
+                <Box position={[1.2, 0, 0]}/> */}
+                <Camera />
+            </Canvas>
+        </div>
+    </div>,
     document.getElementById('root')
 );

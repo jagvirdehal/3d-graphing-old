@@ -1,6 +1,7 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { CameraProps, extend, ReactThreeFiber, useFrame, useThree } from 'react-three-fiber';
+import * as SETTINGS from './settings';
 
 extend({ OrbitControls });
 
@@ -20,8 +21,10 @@ export function Camera(props : CameraProps) {
 
     const controls = useRef<OrbitControls>();
     useFrame((state) => {
-        if (controls.current)
+        if (controls.current) {
             controls.current.update();
+            controls.current.autoRotate = SETTINGS.CAMERA_AUTO_ROTATE;
+        }
     });
 
     return (
